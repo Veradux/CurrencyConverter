@@ -10,6 +10,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
@@ -34,8 +35,8 @@ fun CurrencyInputScreen(
     viewModel: CurrencyInputViewModel = koinViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
-    var showSheet by remember { mutableStateOf(false) }
-    var selectionTarget by remember { mutableStateOf(CurrencySelectionTarget.FROM) }
+    var showSheet by rememberSaveable { mutableStateOf(false) }
+    var selectionTarget by rememberSaveable { mutableStateOf(CurrencySelectionTarget.FROM) }
 
     CurrencyConverterGradientBackground(modifier = Modifier.fillMaxSize()) {
         Scaffold(

@@ -23,10 +23,10 @@ import com.example.currencyconverter.presentation.theme.CurrencyConverterTheme
 
 @Composable
 fun CurrencySelector(
+    modifier: Modifier = Modifier,
     label: String,
     selectedCurrency: Currency?,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
+    onClick: () -> Unit
 ) {
     val displayText = selectedCurrency?.let {
         "${it.flagEmoji}  ${it.code.value} - ${it.displayName}"
