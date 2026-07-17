@@ -1,0 +1,83 @@
+# --- Gradle ---
+.gradle/
+build/
+/app/build/
+/app/release/
+!**/src/test/**/build/
+!**/src/androidTest/**/build/
+
+# --- IDE (Android Studio / IntelliJ) ---
+*.iml
+.idea/
+*.iws
+*.ipr
+
+# --- OS generated files ---
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+Desktop.ini
+
+# --- Android ---
+# Built application files
+*.apk
+*.aab
+*.ap_
+*.aab_
+
+# Files for the ART/Dalvik VM
+*.dex
+
+# Java class files
+*.class
+
+# Generated files
+bin/
+gen/
+out/
+
+# Gradle
+local.properties
+gradle-app.setting
+!gradle-wrapper.jar
+
+# Native build
+.externalNativeBuild/
+.cxx/
+*.so
+
+# Keystore files
+*.jks
+*.keystore
+*.p12
+*.pkcs12
+*.cer
+
+# Google Services (contains project-specific API keys)
+# Uncomment if you don't want to commit API keys:
+# google-services.json
+
+# Fastlane
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots
+fastlane/test_output
+
+# Kotlin
+*.kotlin_module
+
+# Logs
+*.log
+logcat/
+
+# Temporary files
+*~
+*.swp
+*.tmp
+
+# Proguard / R8
+proguard/
