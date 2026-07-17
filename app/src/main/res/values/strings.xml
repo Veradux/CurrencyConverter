@@ -31,4 +31,7 @@
     <string name="target_currency_desc">Target currency: %1$s, amount: %2$s</string>
     <string name="clear_search_desc">Clear search</string>
     <string name="drag_handle_desc">Drag handle</string>
+    <string name="currency_conversion_loading_message">Converting…</string>
+    <string name="currency_input_empty_field_label">Enter amount</string>
+    <string name="currency_input_convert_button_label">Convert</string>
 </resources>

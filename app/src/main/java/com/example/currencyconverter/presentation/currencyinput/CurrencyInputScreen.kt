@@ -13,16 +13,18 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.example.currencyconverter.R
 import com.example.currencyconverter.domain.model.Currency
 import com.example.currencyconverter.domain.model.CurrencyCode
 import com.example.currencyconverter.domain.model.CurrencySelectionTarget
 import com.example.currencyconverter.presentation.components.*
 import com.example.currencyconverter.presentation.currencyselection.CurrencySelectionSheet
-import com.example.currencyconverter.presentation.theme.CurrencyConverterTheme
 import com.example.currencyconverter.presentation.theme.CurrencyConverterGradientBackground
+import com.example.currencyconverter.presentation.theme.CurrencyConverterTheme
 import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -113,6 +115,7 @@ fun CurrencyInputScreen(
 @Composable
 @VisibleForTesting
 internal fun CurrencyInputContent(
+    modifier: Modifier = Modifier,
     uiState: CurrencyInputUiState,
     onFromCurrencyClick: () -> Unit,
     onToCurrencyClick: () -> Unit,
@@ -120,8 +123,7 @@ internal fun CurrencyInputContent(
     onDigitClick: (Char) -> Unit,
     onDecimalClick: () -> Unit,
     onBackspaceClick: () -> Unit,
-    onContinueClick: () -> Unit,
-    modifier: Modifier = Modifier
+    onContinueClick: () -> Unit
 ) {
     val configuration = LocalConfiguration.current
     val isWide = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE ||
@@ -175,9 +177,9 @@ internal fun CurrencyInputContent(
                 val fromCurrency = uiState.fromCurrency
                 CurrencyAmountRow(
                     amount = uiState.amount,
-                    currencyCode = fromCurrency?.code?.value ?: "---",
-                    flagEmoji = fromCurrency?.flagEmoji ?: "🌐",
-                    label = "Enter amount",
+                    currencyCode = fromCurrency?.code?.value ?: "",
+                    flagEmoji = fromCurrency?.flagEmoji ?: "",
+                    label = stringResource(R.string.currency_input_empty_field_label),
                     amountColor = MaterialTheme.colorScheme.primary
                 )
 
@@ -196,7 +198,7 @@ internal fun CurrencyInputContent(
 
                 // Continue button
                 PrimaryActionButton(
-                    text = "Continue",
+                    text = stringResource(R.string.currency_input_convert_button_label),
                     onClick = onContinueClick,
                     enabled = uiState.isValid
                 )
@@ -231,29 +233,31 @@ internal fun CurrencyInputContent(
 @Composable
 private fun CurrencyInputScreenPortraitLightPreview() {
     CurrencyConverterTheme(darkTheme = false) {
-        CurrencyInputContent(
-            uiState = CurrencyInputUiState(
-                fromCurrency = Currency(
-                    code = CurrencyCode("USD"),
-                    displayName = "US Dollar",
-                    flagEmoji = "🇺🇸"
+        CurrencyConverterGradientBackground(modifier = Modifier.fillMaxSize()) {
+            CurrencyInputContent(
+                uiState = CurrencyInputUiState(
+                    fromCurrency = Currency(
+                        code = CurrencyCode("USD"),
+                        displayName = "US Dollar",
+                        flagEmoji = "🇺🇸"
+                    ),
+                    toCurrency = Currency(
+                        code = CurrencyCode("EUR"),
+                        displayName = "Euro",
+                        flagEmoji = "🇪🇺"
+                    ),
+                    amount = "123.45",
+                    isValid = true
                 ),
-                toCurrency = Currency(
-                    code = CurrencyCode("EUR"),
-                    displayName = "Euro",
-                    flagEmoji = "🇪🇺"
-                ),
-                amount = "123.45",
-                isValid = true
-            ),
-            onFromCurrencyClick = {},
-            onToCurrencyClick = {},
-            onSwapCurrencies = {},
-            onDigitClick = {},
-            onDecimalClick = {},
-            onBackspaceClick = {},
-            onContinueClick = {}
-        )
+                onFromCurrencyClick = {},
+                onToCurrencyClick = {},
+                onSwapCurrencies = {},
+                onDigitClick = {},
+                onDecimalClick = {},
+                onBackspaceClick = {},
+                onContinueClick = {}
+            )
+        }
     }
 }
 
@@ -297,28 +301,30 @@ private fun CurrencyInputScreenPortraitDarkPreview() {
 @Composable
 private fun CurrencyInputScreenLandscapeLightPreview() {
     CurrencyConverterTheme(darkTheme = false) {
-        CurrencyInputContent(
-            uiState = CurrencyInputUiState(
-                fromCurrency = Currency(
-                    code = CurrencyCode("GBP"),
-                    displayName = "British Pound",
-                    flagEmoji = "🇬🇧"
+        CurrencyConverterGradientBackground(modifier = Modifier.fillMaxSize()) {
+            CurrencyInputContent(
+                uiState = CurrencyInputUiState(
+                    fromCurrency = Currency(
+                        code = CurrencyCode("GBP"),
+                        displayName = "British Pound",
+                        flagEmoji = "🇬🇧"
+                    ),
+                    toCurrency = Currency(
+                        code = CurrencyCode("JPY"),
+                        displayName = "Japanese Yen",
+                        flagEmoji = "🇯🇵"
+                    ),
+                    amount = "5000",
+                    isValid = true
                 ),
-                toCurrency = Currency(
-                    code = CurrencyCode("JPY"),
-                    displayName = "Japanese Yen",
-                    flagEmoji = "🇯🇵"
-                ),
-                amount = "5000",
-                isValid = true
-            ),
-            onFromCurrencyClick = {},
-            onToCurrencyClick = {},
-            onSwapCurrencies = {},
-            onDigitClick = {},
-            onDecimalClick = {},
-            onBackspaceClick = {},
-            onContinueClick = {}
-        )
+                onFromCurrencyClick = {},
+                onToCurrencyClick = {},
+                onSwapCurrencies = {},
+                onDigitClick = {},
+                onDecimalClick = {},
+                onBackspaceClick = {},
+                onContinueClick = {}
+            )
+        }
     }
 }

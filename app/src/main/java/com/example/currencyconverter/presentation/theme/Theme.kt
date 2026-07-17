@@ -152,7 +152,7 @@ private val LightColorScheme = lightColorScheme(
 @Composable
 fun CurrencyConverterTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    dynamicColor: Boolean = true,
+    dynamicColor: Boolean = false,
     content: @Composable () -> Unit
 ) {
     // Build Material3 color schemes (dynamic or static)

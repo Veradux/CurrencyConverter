@@ -2,6 +2,7 @@ package com.example.currencyconverter.presentation.components
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
@@ -28,7 +29,7 @@ fun CurrencySelector(
     modifier: Modifier = Modifier
 ) {
     val displayText = selectedCurrency?.let {
-        "${it.flagEmoji}  ${it.code.value}\n${it.displayName}"
+        "${it.flagEmoji}  ${it.code.value} - ${it.displayName}"
     } ?: "Select currency"
 
     val contentDesc = selectedCurrency?.let {
@@ -38,7 +39,6 @@ fun CurrencySelector(
     Card(
         modifier = modifier
             .fillMaxWidth()
-            .height(56.dp)
             .semantics {
                 contentDescription = contentDesc
                 role = Role.Button
@@ -46,13 +46,14 @@ fun CurrencySelector(
             .clickable(onClick = onClick),
         shape = CurrencyConverterTheme.shapes.large,
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.25f)
         )
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp)
+                .padding(16.dp),
+            horizontalArrangement = Arrangement.Center
         ) {
             Text(
                 text = label,
@@ -60,7 +61,7 @@ fun CurrencySelector(
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
 
-            Spacer(modifier = Modifier.width(8.dp))
+            Spacer(modifier = Modifier.width(16.dp))
 
             Text(
                 text = displayText,
@@ -70,7 +71,7 @@ fun CurrencySelector(
                     MaterialTheme.colorScheme.onSurface
                 else
                     MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
-                fontSize = if (selectedCurrency != null) 16.sp else 14.sp
+                fontSize = 16.sp
             )
         }
     }

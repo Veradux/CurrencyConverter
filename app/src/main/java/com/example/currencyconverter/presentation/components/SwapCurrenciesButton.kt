@@ -3,8 +3,9 @@ package com.example.currencyconverter.presentation.components
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import com.example.currencyconverter.presentation.theme.CurrencyConverterTheme
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.SwapVert
 import androidx.compose.material3.*
@@ -15,6 +16,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
+import com.example.currencyconverter.presentation.theme.CurrencyConverterTheme
 
 @Composable
 fun SwapCurrenciesButton(
@@ -24,8 +26,12 @@ fun SwapCurrenciesButton(
 
     Box(contentAlignment = Alignment.Center) {
         HorizontalDivider(
-            modifier = Modifier.fillMaxWidth(),
-            color = MaterialTheme.colorScheme.primaryContainer
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(shape = RoundedCornerShape(64.dp))
+                .padding(16.dp),
+            color = MaterialTheme.colorScheme.primaryContainer,
+            thickness = 2.dp
         )
 
         IconButton(
