@@ -26,6 +26,7 @@ import androidx.core.view.WindowCompat
 data class AppColors(
     val gradientStart: Color,
     val gradientMiddle: Color,
+    val gradientMiddle2: Color,
     val gradientEnd: Color,
     val accentCoral: Color,
     val accentTeal: Color,
@@ -54,6 +55,7 @@ val LocalAppColors = staticCompositionLocalOf {
     AppColors(
         gradientStart = Color.Unspecified,
         gradientMiddle = Color.Unspecified,
+        gradientMiddle2 = Color.Unspecified,
         gradientEnd = Color.Unspecified,
         accentCoral = Color.Unspecified,
         accentTeal = Color.Unspecified,
@@ -161,6 +163,7 @@ fun CurrencyConverterTheme(
             val context = LocalContext.current
             if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
         }
+
         darkTheme -> DarkColorScheme
         else -> LightColorScheme
     }
@@ -233,7 +236,12 @@ fun CurrencyConverterGradientBackground(
     Box(
         modifier = modifier.background(
             brush = Brush.verticalGradient(
-                colors = listOf(colors.gradientStart, colors.gradientMiddle, colors.gradientEnd),
+                colors = listOf(
+                    colors.gradientStart,
+                    colors.gradientMiddle,
+                    colors.gradientMiddle2,
+                    colors.gradientEnd
+                ),
             ),
         ),
         content = content,

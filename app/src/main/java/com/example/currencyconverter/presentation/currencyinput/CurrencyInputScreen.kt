@@ -174,35 +174,35 @@ internal fun CurrencyInputContent(
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                // Amount display
-                val fromCurrency = uiState.fromCurrency
-                CurrencyAmountRow(
-                    amount = uiState.amount,
-                    currencyCode = fromCurrency?.code?.value ?: "",
-                    flagEmoji = fromCurrency?.flagEmoji ?: "",
-                    label = stringResource(R.string.currency_input_empty_field_label),
-                    amountColor = MaterialTheme.colorScheme.primary
-                )
-
                 // Validation error
                 val error = uiState.validationError
-                if (error != null) {
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = error,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.error
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = error ?: "",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.error
+                )
+
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    // Amount display
+                    val fromCurrency = uiState.fromCurrency
+                    CurrencyAmountRow(
+                        amount = uiState.amount,
+                        currencyCode = fromCurrency?.code?.value ?: "",
+                        flagEmoji = fromCurrency?.flagEmoji ?: "",
+                        label = stringResource(R.string.currency_input_empty_field_label),
+                        amountColor = MaterialTheme.colorScheme.onBackground
+                    )
+
+                    Spacer(modifier = Modifier.width(16.dp))
+
+                    // Continue button
+                    PrimaryActionButton(
+                        text = stringResource(R.string.currency_input_convert_button_label),
+                        onClick = onContinueClick,
+                        enabled = uiState.isValid
                     )
                 }
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                // Continue button
-                PrimaryActionButton(
-                    text = stringResource(R.string.currency_input_convert_button_label),
-                    onClick = onContinueClick,
-                    enabled = uiState.isValid
-                )
 
                 if (!isWide) {
                     Spacer(modifier = Modifier.height(8.dp))

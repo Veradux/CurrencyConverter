@@ -33,7 +33,6 @@ fun CurrencyAmountRow(
 ) {
     Column(
         modifier = modifier
-            .fillMaxWidth()
             .padding(horizontal = 24.dp, vertical = 8.dp)
             .semantics { contentDescription = "$label: $amount $currencyCode" },
         horizontalAlignment = Alignment.CenterHorizontally

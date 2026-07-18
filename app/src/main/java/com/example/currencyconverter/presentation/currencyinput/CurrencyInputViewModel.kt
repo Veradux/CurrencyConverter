@@ -171,11 +171,9 @@ class CurrencyInputViewModel(
     }
 
     private fun getValidationError(state: CurrencyInputUiState): String? {
-        val amount = state.amount
+        val amount = state.amount.ifEmpty { "0" }
         val fromCurrency = state.fromCurrency
         val toCurrency = state.toCurrency
-
-        if (amount.isEmpty()) return null
 
         val parsedAmount = try {
             BigDecimal(amount)
@@ -188,11 +186,11 @@ class CurrencyInputViewModel(
         }
 
         if (fromCurrency != null && toCurrency != null && fromCurrency.code == toCurrency.code) {
-            return "Please select different currencies"
+            return "Must select different currencies"
         }
 
         if (fromCurrency == null || toCurrency == null) {
-            return null
+            return "Must select two currencies"
         }
 
         return null

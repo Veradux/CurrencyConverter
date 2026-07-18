@@ -48,9 +48,10 @@ val LightScrim = Color(0xFF000000)
  * Extends beyond Material3 ColorScheme with app-specific semantic tokens.
  */
 val DarkAppColors = AppColors(
-    gradientStart = Color(0xFF9378BE),
-    gradientMiddle = Color(0xFF3F2D77),
-    gradientEnd = Color(0xFF0D0B1E),
+    gradientStart = Color(0xFFC97A5C),
+    gradientMiddle = Color(0xFF73589D),
+    gradientMiddle2 = Color(0xFF372562),
+    gradientEnd = Color(0xFF120B1E),
     accentCoral = Color(0xFFFF6B6B),
     accentTeal = Color(0xFF4ECDC4),
     keypadBackground = Color(0xFF1A1540),
@@ -64,8 +65,9 @@ val DarkAppColors = AppColors(
  */
 val LightAppColors = AppColors(
     gradientStart = Color(0xFFFFFFFF),
-    gradientMiddle = Color(0xFFEFE8FF),
-    gradientEnd = Color(0xFFDDD3FF),
+    gradientMiddle = Color(0xFFEFE5FF),
+    gradientMiddle2 = Color(0xFFFFFDEB),
+    gradientEnd = Color(0xFFD4B0FD),
     accentCoral = Color(0xFFE84C4C),
     accentTeal = Color(0xFF3AADA5),
     keypadBackground = Color(0xFFF0EDFF),

@@ -1,17 +1,16 @@
 package com.example.currencyconverter.presentation.components
 
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
+import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.CheckCircleOutline
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.currencyconverter.presentation.theme.CurrencyConverterTheme
@@ -23,25 +22,23 @@ fun PrimaryActionButton(
     onClick: () -> Unit,
     enabled: Boolean = true
 ) {
-    Button(
+    IconButton(
         onClick = onClick,
         enabled = enabled,
         modifier = modifier
-            .fillMaxWidth()
-            .semantics { contentDescription = text },
-        shape = RoundedCornerShape(64.dp),
-        colors = ButtonDefaults.buttonColors(
+            .semantics { contentDescription = text }
+            .size(80.dp),
+        colors = IconButtonDefaults.iconButtonColors(
             containerColor = MaterialTheme.colorScheme.primary,
             contentColor = MaterialTheme.colorScheme.onPrimary,
             disabledContainerColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f),
             disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
         )
     ) {
-        Text(
-            modifier = Modifier.padding(16.dp),
-            text = text,
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.SemiBold
+        Icon(
+            imageVector = Icons.Rounded.CheckCircleOutline,
+            contentDescription = "Swap currencies",
+            modifier = Modifier.size(48.dp)
         )
     }
 }
