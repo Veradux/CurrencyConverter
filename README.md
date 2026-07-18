@@ -3,10 +3,11 @@
 An Android currency conversion app built with Jetpack Compose and Material Design 3.
 Converts currencies in real-time using the [ExchangeRate-API](https://www.exchangerate-api.com/). 
 Contains features such as 
-* currency search and selection
+* currency search, selection, and conversion
 * adaptive layouts for portrait and landscape
 * light and dark themes
-* a custom numeric keypad
+* success, loading, and error states when fetching data
+* a custom numeric keypad for a sleek feel
 * emoji country flag display
 
 <img width="1672" height="941" alt="image" src="https://github.com/user-attachments/assets/7e39e7e1-c49c-4b2b-885d-1733951887b4" />
