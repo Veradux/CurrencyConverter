@@ -73,3 +73,13 @@ EXCHANGE_RATE_API_KEY=your_api_key_here
 - **Compose UI tests** for CurrencyInputScreen and CurrencyConversionScreen (in `app/src/androidTest/`)
 - Uses `FakeExchangeRatesRepository` for ViewModel tests — no real network calls
 - Uses `kotlinx-coroutines-test` with `StandardTestDispatcher` for deterministic coroutine testing
+
+## Development timeline
+9 hours total across 2 days.
+#### July 16 Thursday
+- Spent 2 hours writing and refining main AI prompt with assistance from GPT-5.6 Sol, describing all specifications. [You can find the prompt here.](mainPrompt.md)
+- Spent 1 hour running prompt with Deepseek v4 Pro (these model choices are not personal preference, they were picked experimentally).
+
+#### July 17 Friday
+- Spent 2 hours validating prompt results, fixing issues, and steering the model to strictly follow the specifications.
+- Spent 4 hours polishing design, refactoring code, fixing edge cases, and manually testing.

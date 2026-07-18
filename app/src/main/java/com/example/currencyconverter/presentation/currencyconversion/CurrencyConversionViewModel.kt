@@ -62,22 +62,10 @@ class CurrencyConversionViewModel(
 
         _amountFlow.value = amount
 
-        // Debounced conversion trigger
         viewModelScope.launch {
             _amountFlow
                 .debounce(400.milliseconds)
-                .collect { currentAmount ->
-                    if (currentAmount.isNotEmpty()) {
-                        val parsed = try {
-                            BigDecimal(currentAmount)
-                        } catch (_: NumberFormatException) {
-                            null
-                        }
-                        if (parsed != null && parsed > BigDecimal.ZERO) {
-                            performConversion(parsed)
-                        }
-                    }
-                }
+                .collect { tryTriggerConversion(it) }
         }
     }
 
@@ -89,8 +77,12 @@ class CurrencyConversionViewModel(
     fun onAmountDigit(digit: Char) {
         val current = _uiState.value.sourceAmount
         if (current.length >= 15) return
-        val newAmount = current + digit
-        onSourceAmountChanged(newAmount)
+
+        // Enforce max 2 decimal places
+        val decimalIndex = current.indexOf('.')
+        if (decimalIndex >= 0 && current.length - decimalIndex > 2) return
+
+        onSourceAmountChanged(current + digit)
     }
 
     fun onAmountDecimal() {
@@ -111,12 +103,10 @@ class CurrencyConversionViewModel(
         conversionJob?.cancel()
 
         _uiState.update { state ->
-            val lastQuote = state.lastQuote
-            val newSourceAmount = if (lastQuote != null) {
-                lastQuote.convertedAmount.setScale(2, RoundingMode.HALF_UP).toPlainString()
-            } else {
-                state.sourceAmount
-            }
+            val newSourceAmount = state.lastQuote?.convertedAmount
+                ?.setScale(2, RoundingMode.HALF_UP)
+                ?.toPlainString()
+                ?: state.sourceAmount
 
             state.copy(
                 fromCurrency = state.toCurrency,
@@ -128,35 +118,23 @@ class CurrencyConversionViewModel(
         }
 
         _amountFlow.value = _uiState.value.sourceAmount
-
-        // Trigger conversion with new amount
-        val currentAmount = _uiState.value.sourceAmount
-        if (currentAmount.isNotEmpty()) {
-            val parsed = try {
-                BigDecimal(currentAmount)
-            } catch (_: NumberFormatException) {
-                null
-            }
-            if (parsed != null && parsed > BigDecimal.ZERO) {
-                performConversion(parsed)
-            }
-        }
+        tryTriggerConversion(_uiState.value.sourceAmount)
     }
 
     fun onRetry() {
-        val currentAmount = _uiState.value.sourceAmount
-        if (currentAmount.isNotEmpty()) {
-            val parsed = try {
-                BigDecimal(currentAmount)
-            } catch (_: NumberFormatException) {
-                null
-            }
-            if (parsed != null && parsed > BigDecimal.ZERO) {
-                _uiState.update {
-                    it.copy(conversionStatus = ConversionStatus.Loading)
-                }
-                performConversion(parsed)
-            }
+        _uiState.update { it.copy(conversionStatus = ConversionStatus.Loading) }
+        tryTriggerConversion(_uiState.value.sourceAmount)
+    }
+
+    private fun tryTriggerConversion(amountStr: String) {
+        if (amountStr.isEmpty()) return
+        val parsed = try {
+            BigDecimal(amountStr)
+        } catch (_: NumberFormatException) {
+            null
+        }
+        if (parsed != null && parsed > BigDecimal.ZERO) {
+            performConversion(parsed)
         }
     }
 
