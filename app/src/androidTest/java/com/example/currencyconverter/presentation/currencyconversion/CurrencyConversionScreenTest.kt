@@ -159,4 +159,59 @@ class CurrencyConversionScreenTest {
 
         composeTestRule.onNodeWithText("1 EUR = 1.08 USD").assertIsDisplayed()
     }
+
+    @Test
+    fun conversionCardWithLoadingIndicatorShowsCurrencyCode() {
+        composeTestRule.setContent {
+            CurrencyConverterTheme {
+                CurrencyConversionCard(
+                    flagEmoji = "\uD83C\uDDFA\uD83C\uDDF8",
+                    currencyCode = "USD",
+                    amount = "100",
+                    isSource = true,
+                    amountColor = MaterialTheme.colorScheme.onBackground,
+                    isLoading = true
+                )
+            }
+        }
+
+        // Loading indicator should still show the currency code
+        composeTestRule.onNodeWithText("USD").assertIsDisplayed()
+    }
+
+    @Test
+    fun conversionCardTargetHasCorrectSemanticDescription() {
+        composeTestRule.setContent {
+            CurrencyConverterTheme {
+                CurrencyConversionCard(
+                    flagEmoji = "\uD83C\uDDEA\uD83C\uDDFA",
+                    currencyCode = "EUR",
+                    amount = "92.50",
+                    isSource = false,
+                    amountColor = MaterialTheme.colorScheme.onBackground
+                )
+            }
+        }
+
+        composeTestRule.onNodeWithContentDescription(
+            "Target currency: EUR, amount: 92.50"
+        ).assertIsDisplayed()
+    }
+
+    @Test
+    fun conversionCardWithEmptyCurrencyShowsDash() {
+        composeTestRule.setContent {
+            CurrencyConverterTheme {
+                CurrencyConversionCard(
+                    flagEmoji = "\uD83C\uDF10",
+                    currencyCode = "---",
+                    amount = "0",
+                    isSource = true,
+                    amountColor = MaterialTheme.colorScheme.onBackground
+                )
+            }
+        }
+
+        composeTestRule.onNodeWithText("---").assertIsDisplayed()
+    }
 }

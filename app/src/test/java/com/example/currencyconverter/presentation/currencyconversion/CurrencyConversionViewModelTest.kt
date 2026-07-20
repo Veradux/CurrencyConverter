@@ -369,4 +369,67 @@ class CurrencyConversionViewModelTest {
         viewModel.onAmountDigit('2')
         assertEquals("1".repeat(15), viewModel.uiState.value.sourceAmount)
     }
+
+    @Test
+    fun invalidAmountFormatDoesNotCrash() = runTest(testDispatcher) {
+        createViewModel(amount = "abc")
+        advanceTimeBy(500.milliseconds)
+        advanceUntilIdle()
+
+        assertEquals(0, fakeRepository.convertCurrencyCallCount)
+    }
+
+    @Test
+    fun swapBeforeConversionKeepsSourceAmount() = runTest(testDispatcher) {
+        val viewModel = createViewModel(fromCode = "USD", toCode = "EUR", amount = "100")
+
+        // Swap before debounce triggers - no lastQuote yet
+        viewModel.onSwapCurrencies()
+
+        val state = viewModel.uiState.value
+        assertEquals("EUR", state.fromCurrency.value)
+        assertEquals("USD", state.toCurrency.value)
+        assertEquals("100", state.sourceAmount)
+    }
+
+    @Test
+    fun swapWithLastQuoteUsesConvertedAmount() = runTest(testDispatcher) {
+        fakeRepository.conversionResult = CurrencyResult.Success(
+            ConversionQuote(
+                fromCurrency = usd,
+                toCurrency = eur,
+                sourceAmount = BigDecimal("100"),
+                convertedAmount = BigDecimal("92.50"),
+                conversionRate = BigDecimal("0.925"),
+                inverseRate = BigDecimal("1.0810810810")
+            )
+        )
+
+        val viewModel = createViewModel(amount = "100")
+        advanceTimeBy(500.milliseconds)
+        advanceUntilIdle()
+
+        fakeRepository.conversionResult = CurrencyResult.Success(
+            ConversionQuote(
+                fromCurrency = eur,
+                toCurrency = usd,
+                sourceAmount = BigDecimal("92.50"),
+                convertedAmount = BigDecimal("108.11"),
+                conversionRate = BigDecimal("1.0810810810"),
+                inverseRate = BigDecimal("0.925")
+            )
+        )
+
+        viewModel.onSwapCurrencies()
+
+        assertEquals("92.50", viewModel.uiState.value.sourceAmount)
+    }
+
+    @Test
+    fun onAmountBackspaceOnEmptyDoesNothing() = runTest(testDispatcher) {
+        val viewModel = createViewModel(amount = "")
+
+        viewModel.onAmountBackspace()
+        assertEquals("", viewModel.uiState.value.sourceAmount)
+    }
 }

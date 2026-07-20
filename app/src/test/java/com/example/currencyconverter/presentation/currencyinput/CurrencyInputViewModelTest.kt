@@ -15,6 +15,7 @@ import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -276,5 +277,193 @@ class CurrencyInputViewModelTest {
 
         viewModel.onAmountBackspace()
         assertEquals("", viewModel.uiState.value.amount)
+    }
+
+    @Test
+    fun onSwapCurrenciesSwapsTheCurrencies() = runTest(testDispatcher) {
+        val usd = Currency(CurrencyCode("USD"), "US Dollar", "\uD83C\uDDFA\uD83C\uDDF8")
+        val eur = Currency(CurrencyCode("EUR"), "Euro", "\uD83C\uDDEA\uD83C\uDDFA")
+        fakeRepository.currencies = listOf(usd, eur)
+
+        val viewModel = createViewModel()
+        advanceUntilIdle()
+
+        viewModel.onFromCurrencySelected(usd)
+        viewModel.onToCurrencySelected(eur)
+
+        viewModel.onSwapCurrencies()
+
+        val state = viewModel.uiState.value
+        assertEquals(eur, state.fromCurrency)
+        assertEquals(usd, state.toCurrency)
+    }
+
+    @Test
+    fun onSwapCurrenciesWhenNullDoesNothing() = runTest(testDispatcher) {
+        val usd = Currency(CurrencyCode("USD"), "US Dollar", "\uD83C\uDDFA\uD83C\uDDF8")
+        val eur = Currency(CurrencyCode("EUR"), "Euro", "\uD83C\uDDEA\uD83C\uDDFA")
+        fakeRepository.currencies = listOf(usd, eur)
+
+        val viewModel = createViewModel()
+        advanceUntilIdle()
+
+        viewModel.onSwapCurrencies()
+
+        val state = viewModel.uiState.value
+        assertNull(state.fromCurrency)
+        assertNull(state.toCurrency)
+    }
+
+    @Test
+    fun retryWithForceRefreshTriggersNewLoad() = runTest(testDispatcher) {
+        val usd = Currency(CurrencyCode("USD"), "US Dollar", "\uD83C\uDDFA\uD83C\uDDF8")
+        val eur = Currency(CurrencyCode("EUR"), "Euro", "\uD83C\uDDEA\uD83C\uDDFA")
+        fakeRepository.shouldThrowNetworkError = true
+
+        val viewModel = createViewModel()
+        advanceUntilIdle()
+
+        assertNotNull(viewModel.uiState.value.error)
+
+        fakeRepository.shouldThrowNetworkError = false
+        fakeRepository.currencies = listOf(usd, eur)
+
+        viewModel.retry()
+        advanceUntilIdle()
+
+        val state = viewModel.uiState.value
+        assertFalse(state.isLoading)
+        assertNull(state.error)
+    }
+
+    @Test
+    fun sameCurrencyShowsValidationError() = runTest(testDispatcher) {
+        val usd = Currency(CurrencyCode("USD"), "US Dollar", "\uD83C\uDDFA\uD83C\uDDF8")
+        val eur = Currency(CurrencyCode("EUR"), "Euro", "\uD83C\uDDEA\uD83C\uDDFA")
+        fakeRepository.currencies = listOf(usd, eur)
+
+        val viewModel = createViewModel()
+        advanceUntilIdle()
+
+        viewModel.onFromCurrencySelected(usd)
+        viewModel.onToCurrencySelected(usd)
+        viewModel.onAmountDigit('1')
+        viewModel.onAmountDigit('0')
+        viewModel.onAmountDigit('0')
+
+        val state = viewModel.uiState.value
+        assertFalse(state.isValid)
+        assertTrue(state.validationError?.contains("different currencies") == true)
+    }
+
+    @Test
+    fun noCurrenciesShowsValidationError() = runTest(testDispatcher) {
+        val usd = Currency(CurrencyCode("USD"), "US Dollar", "\uD83C\uDDFA\uD83C\uDDF8")
+        val eur = Currency(CurrencyCode("EUR"), "Euro", "\uD83C\uDDEA\uD83C\uDDFA")
+        fakeRepository.currencies = listOf(usd, eur)
+
+        val viewModel = createViewModel()
+        advanceUntilIdle()
+
+        viewModel.onAmountDigit('1')
+        viewModel.onAmountDigit('0')
+        viewModel.onAmountDigit('0')
+
+        val state = viewModel.uiState.value
+        assertFalse(state.isValid)
+        assertTrue(state.validationError?.contains("Must select two currencies") == true)
+    }
+
+    @Test
+    fun emptyAmountTreatedAsZero() = runTest(testDispatcher) {
+        val usd = Currency(CurrencyCode("USD"), "US Dollar", "\uD83C\uDDFA\uD83C\uDDF8")
+        val eur = Currency(CurrencyCode("EUR"), "Euro", "\uD83C\uDDEA\uD83C\uDDFA")
+        fakeRepository.currencies = listOf(usd, eur)
+
+        val viewModel = createViewModel()
+        advanceUntilIdle()
+
+        viewModel.onFromCurrencySelected(usd)
+        viewModel.onToCurrencySelected(eur)
+
+        val state = viewModel.uiState.value
+        assertFalse(state.isValid)
+        assertTrue(state.validationError?.contains("greater than zero") == true)
+    }
+
+    @Test
+    fun maxDecimalPlacesRespected() = runTest(testDispatcher) {
+        val usd = Currency(CurrencyCode("USD"), "US Dollar", "\uD83C\uDDFA\uD83C\uDDF8")
+        val eur = Currency(CurrencyCode("EUR"), "Euro", "\uD83C\uDDEA\uD83C\uDDFA")
+        fakeRepository.currencies = listOf(usd, eur)
+
+        val viewModel = createViewModel()
+        advanceUntilIdle()
+
+        viewModel.onAmountDigit('1')
+        viewModel.onAmountDecimal()
+        viewModel.onAmountDigit('2')
+        viewModel.onAmountDigit('3')
+
+        assertEquals("1.23", viewModel.uiState.value.amount)
+
+        viewModel.onAmountDigit('4')
+        assertEquals("1.23", viewModel.uiState.value.amount)
+    }
+
+    @Test
+    fun initialStateFromSavedStateHandle() = runTest(testDispatcher) {
+        val usd = Currency(CurrencyCode("USD"), "US Dollar", "\uD83C\uDDFA\uD83C\uDDF8")
+        val eur = Currency(CurrencyCode("EUR"), "Euro", "\uD83C\uDDEA\uD83C\uDDFA")
+        fakeRepository.currencies = listOf(usd, eur)
+        val savedStateHandle = SavedStateHandle().apply {
+            set("fromCurrency", usd)
+            set("toCurrency", eur)
+            set("amount", "50")
+        }
+
+        val viewModel = createViewModel(savedStateHandle)
+
+        val state = viewModel.uiState.value
+        assertEquals(usd, state.fromCurrency)
+        assertEquals(eur, state.toCurrency)
+        assertEquals("50", state.amount)
+    }
+
+    @Test
+    fun onFromCurrencySelectedUpdatesValidation() = runTest(testDispatcher) {
+        val usd = Currency(CurrencyCode("USD"), "US Dollar", "\uD83C\uDDFA\uD83C\uDDF8")
+        val eur = Currency(CurrencyCode("EUR"), "Euro", "\uD83C\uDDEA\uD83C\uDDFA")
+        fakeRepository.currencies = listOf(usd, eur)
+
+        val viewModel = createViewModel()
+        advanceUntilIdle()
+
+        viewModel.onFromCurrencySelected(usd)
+        viewModel.onToCurrencySelected(eur)
+        viewModel.onAmountDigit('1')
+        viewModel.onAmountDigit('0')
+        viewModel.onAmountDigit('0')
+
+        val state = viewModel.uiState.value
+        assertTrue(state.isValid)
+        assertNull(state.validationError)
+    }
+
+    @Test
+    fun onFromCurrencySelectedSavesToHandle() = runTest(testDispatcher) {
+        val usd = Currency(CurrencyCode("USD"), "US Dollar", "\uD83C\uDDFA\uD83C\uDDF8")
+        val eur = Currency(CurrencyCode("EUR"), "Euro", "\uD83C\uDDEA\uD83C\uDDFA")
+        fakeRepository.currencies = listOf(usd, eur)
+
+        val savedStateHandle = SavedStateHandle()
+        val viewModel = createViewModel(savedStateHandle)
+        advanceUntilIdle()
+
+        viewModel.onFromCurrencySelected(usd)
+
+        val secondViewModel = CurrencyInputViewModel(savedStateHandle, getSupportedCurrenciesUseCase)
+        advanceUntilIdle()
+        assertEquals(usd, secondViewModel.uiState.value.fromCurrency)
     }
 }

@@ -63,4 +63,16 @@ class CurrencyCodeTest {
         val usd = CurrencyCode("usd")
         assertEquals("usd", usd.value)
     }
+
+    @Test
+    fun emptyStringThrows() {
+        assertThrows(IllegalArgumentException::class.java) {
+            CurrencyCode("")
+        }
+    }
+
+    @Test
+    fun toStringReturnsValue() {
+        assertEquals("USD", CurrencyCode("USD").toString())
+    }
 }

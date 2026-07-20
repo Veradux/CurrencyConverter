@@ -7,7 +7,9 @@ import com.example.currencyconverter.domain.model.DomainError
 import com.example.currencyconverter.domain.usecase.GetSupportedCurrenciesUseCase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
@@ -16,6 +18,7 @@ import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -226,5 +229,191 @@ class CurrencySelectionViewModelTest {
 
         assertNotNull(viewModel.uiState.value.oppositeCurrency)
         assertEquals("EUR", viewModel.uiState.value.oppositeCurrency?.code?.value)
+    }
+
+    @Test
+    fun filteredCurrenciesExcludesOppositeCurrency() = runTest(testDispatcher) {
+        val usd = Currency(CurrencyCode("USD"), "US Dollar", "\uD83C\uDDFA\uD83C\uDDF8")
+        val eur = Currency(CurrencyCode("EUR"), "Euro", "\uD83C\uDDEA\uD83C\uDDFA")
+        val gbp = Currency(CurrencyCode("GBP"), "British Pound", "\uD83C\uDDEC\uD83C\uDDE7")
+        fakeRepository.currencies = listOf(usd, eur, gbp)
+
+        val viewModel = createViewModel()
+        viewModel.loadCurrencies()
+        advanceUntilIdle()
+
+        viewModel.setOppositeCurrency(eur)
+        advanceUntilIdle()
+
+        val results = mutableListOf<List<Currency>>()
+        val collectJob = launch(UnconfinedTestDispatcher(testDispatcher.scheduler)) {
+            viewModel.filteredCurrencies.collect { results.add(it) }
+        }
+        advanceUntilIdle()
+
+        val latest = results.last()
+        val codes = latest.map { it.code.value }
+        assertTrue(codes.contains("USD"))
+        assertTrue(codes.contains("GBP"))
+        assertFalse(codes.contains("EUR"))
+
+        collectJob.cancel()
+    }
+
+    @Test
+    fun filteredCurrenciesSearchesByCode() = runTest(testDispatcher) {
+        val usd = Currency(CurrencyCode("USD"), "US Dollar", "\uD83C\uDDFA\uD83C\uDDF8")
+        val eur = Currency(CurrencyCode("EUR"), "Euro", "\uD83C\uDDEA\uD83C\uDDFA")
+        val gbp = Currency(CurrencyCode("GBP"), "British Pound", "\uD83C\uDDEC\uD83C\uDDE7")
+        fakeRepository.currencies = listOf(usd, eur, gbp)
+
+        val viewModel = createViewModel()
+        viewModel.loadCurrencies()
+        advanceUntilIdle()
+
+        viewModel.onSearchQueryChanged("us")
+        advanceUntilIdle()
+
+        val results = mutableListOf<List<Currency>>()
+        val collectJob = launch(UnconfinedTestDispatcher(testDispatcher.scheduler)) {
+            viewModel.filteredCurrencies.collect { results.add(it) }
+        }
+        advanceUntilIdle()
+
+        val latest = results.last()
+        assertEquals(1, latest.size)
+        assertEquals("USD", latest[0].code.value)
+
+        collectJob.cancel()
+    }
+
+    @Test
+    fun filteredCurrenciesSearchesByName() = runTest(testDispatcher) {
+        val usd = Currency(CurrencyCode("USD"), "US Dollar", "\uD83C\uDDFA\uD83C\uDDF8")
+        val eur = Currency(CurrencyCode("EUR"), "Euro", "\uD83C\uDDEA\uD83C\uDDFA")
+        val gbp = Currency(CurrencyCode("GBP"), "British Pound", "\uD83C\uDDEC\uD83C\uDDE7")
+        fakeRepository.currencies = listOf(usd, eur, gbp)
+
+        val viewModel = createViewModel()
+        viewModel.loadCurrencies()
+        advanceUntilIdle()
+
+        viewModel.onSearchQueryChanged("euro")
+        advanceUntilIdle()
+
+        val results = mutableListOf<List<Currency>>()
+        val collectJob = launch(UnconfinedTestDispatcher(testDispatcher.scheduler)) {
+            viewModel.filteredCurrencies.collect { results.add(it) }
+        }
+        advanceUntilIdle()
+
+        val latest = results.last()
+        assertEquals(1, latest.size)
+        assertEquals("EUR", latest[0].code.value)
+
+        collectJob.cancel()
+    }
+
+    @Test
+    fun filteredCurrenciesCaseInsensitive() = runTest(testDispatcher) {
+        val usd = Currency(CurrencyCode("USD"), "US Dollar", "\uD83C\uDDFA\uD83C\uDDF8")
+        val eur = Currency(CurrencyCode("EUR"), "Euro", "\uD83C\uDDEA\uD83C\uDDFA")
+        fakeRepository.currencies = listOf(usd, eur)
+
+        val viewModel = createViewModel()
+        viewModel.loadCurrencies()
+        advanceUntilIdle()
+
+        viewModel.onSearchQueryChanged("usd")
+        advanceUntilIdle()
+
+        val results = mutableListOf<List<Currency>>()
+        val collectJob = launch(UnconfinedTestDispatcher(testDispatcher.scheduler)) {
+            viewModel.filteredCurrencies.collect { results.add(it) }
+        }
+        advanceUntilIdle()
+
+        val latest = results.last()
+        assertEquals(1, latest.size)
+        assertEquals("USD", latest[0].code.value)
+
+        collectJob.cancel()
+    }
+
+    @Test
+    fun setOppositeCurrencyNullClearsIt() = runTest(testDispatcher) {
+        val usd = Currency(CurrencyCode("USD"), "US Dollar", "\uD83C\uDDFA\uD83C\uDDF8")
+        val eur = Currency(CurrencyCode("EUR"), "Euro", "\uD83C\uDDEA\uD83C\uDDFA")
+        fakeRepository.currencies = listOf(usd, eur)
+
+        val viewModel = createViewModel()
+        viewModel.loadCurrencies()
+        advanceUntilIdle()
+
+        viewModel.setOppositeCurrency(eur)
+        advanceUntilIdle()
+        assertNotNull(viewModel.uiState.value.oppositeCurrency)
+
+        viewModel.setOppositeCurrency(null)
+        advanceUntilIdle()
+        assertNull(viewModel.uiState.value.oppositeCurrency)
+    }
+
+    @Test
+    fun emptySearchShowsAllExceptOpposite() = runTest(testDispatcher) {
+        val usd = Currency(CurrencyCode("USD"), "US Dollar", "\uD83C\uDDFA\uD83C\uDDF8")
+        val eur = Currency(CurrencyCode("EUR"), "Euro", "\uD83C\uDDEA\uD83C\uDDFA")
+        val gbp = Currency(CurrencyCode("GBP"), "British Pound", "\uD83C\uDDEC\uD83C\uDDE7")
+        fakeRepository.currencies = listOf(usd, eur, gbp)
+
+        val viewModel = createViewModel()
+        viewModel.loadCurrencies()
+        advanceUntilIdle()
+
+        viewModel.setOppositeCurrency(usd)
+        advanceUntilIdle()
+
+        viewModel.onSearchQueryChanged("")
+        advanceUntilIdle()
+
+        val results = mutableListOf<List<Currency>>()
+        val collectJob = launch(UnconfinedTestDispatcher(testDispatcher.scheduler)) {
+            viewModel.filteredCurrencies.collect { results.add(it) }
+        }
+        advanceUntilIdle()
+
+        val latest = results.last()
+        val codes = latest.map { it.code.value }
+        assertTrue(codes.contains("EUR"))
+        assertTrue(codes.contains("GBP"))
+        assertFalse(codes.contains("USD"))
+
+        collectJob.cancel()
+    }
+
+    @Test
+    fun searchQueryWithWhitespaceTrimmed() = runTest(testDispatcher) {
+        val usd = Currency(CurrencyCode("USD"), "US Dollar", "\uD83C\uDDFA\uD83C\uDDF8")
+        val eur = Currency(CurrencyCode("EUR"), "Euro", "\uD83C\uDDEA\uD83C\uDDFA")
+        fakeRepository.currencies = listOf(usd, eur)
+
+        val viewModel = createViewModel()
+        viewModel.loadCurrencies()
+        advanceUntilIdle()
+
+        viewModel.onSearchQueryChanged("  us  ")
+        advanceUntilIdle()
+
+        val results = mutableListOf<List<Currency>>()
+        val collectJob = launch(UnconfinedTestDispatcher(testDispatcher.scheduler)) {
+            viewModel.filteredCurrencies.collect { results.add(it) }
+        }
+        advanceUntilIdle()
+
+        val latest = results.last()
+        assertEquals(1, latest.size)
+        assertEquals("USD", latest[0].code.value)
+
+        collectJob.cancel()
     }
 }

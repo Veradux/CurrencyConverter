@@ -273,4 +273,146 @@ class RemoteExchangeRatesRepositoryTest {
         assertTrue(result is CurrencyResult.Error)
         assertTrue((result as CurrencyResult.Error).error is DomainError.NetworkError)
     }
+
+    @Test
+    fun convertCurrencyHttpErrorWithJsonBody() = runBlocking {
+        mockWebServer.enqueue(
+            MockResponse()
+                .setResponseCode(400)
+                .setBody("""{"result": "error", "error-type": "quota-reached"}""")
+        )
+
+        val from = com.example.currencyconverter.domain.model.CurrencyCode("USD")
+        val to = com.example.currencyconverter.domain.model.CurrencyCode("EUR")
+        val result = repository.convertCurrency(from, to, BigDecimal("100"))
+
+        assertTrue(result is CurrencyResult.Error)
+        val error = (result as CurrencyResult.Error).error
+        assertTrue(error is DomainError.QuotaReached)
+    }
+
+    @Test
+    fun convertCurrencyServerErrorNoJsonBody() = runBlocking {
+        mockWebServer.enqueue(
+            MockResponse()
+                .setResponseCode(500)
+                .setBody("Internal Server Error")
+        )
+
+        val from = com.example.currencyconverter.domain.model.CurrencyCode("USD")
+        val to = com.example.currencyconverter.domain.model.CurrencyCode("EUR")
+        val result = repository.convertCurrency(from, to, BigDecimal("100"))
+
+        assertTrue(result is CurrencyResult.Error)
+        assertTrue((result as CurrencyResult.Error).error is DomainError.ServerError)
+    }
+
+    @Test
+    fun convertCurrencyGenericException() = runBlocking {
+        mockWebServer.enqueue(
+            MockResponse()
+                .setResponseCode(400)
+                .setBody("this is not valid json{{{")
+        )
+
+        val from = com.example.currencyconverter.domain.model.CurrencyCode("USD")
+        val to = com.example.currencyconverter.domain.model.CurrencyCode("EUR")
+        val result = repository.convertCurrency(from, to, BigDecimal("100"))
+
+        assertTrue(result is CurrencyResult.Error)
+        assertTrue((result as CurrencyResult.Error).error is DomainError.ServerError)
+    }
+
+    @Test
+    fun getSupportedCurrenciesCachedFallbackOnNetworkError() = runBlocking {
+        // First, populate the cache with a successful response
+        val successJson = """
+            {
+                "result": "success",
+                "supported_codes": [
+                    ["USD", "US Dollar"],
+                    ["EUR", "Euro"]
+                ]
+            }
+        """.trimIndent()
+
+        mockWebServer.enqueue(
+            MockResponse()
+                .setResponseCode(200)
+                .setBody(successJson)
+        )
+
+        val result1 = repository.getSupportedCurrencies(forceRefresh = true)
+        assertTrue(result1 is CurrencyResult.Success)
+
+        // Now simulate a network error and verify cache fallback
+        mockWebServer.enqueue(
+            MockResponse()
+                .setSocketPolicy(SocketPolicy.DISCONNECT_AFTER_REQUEST)
+        )
+
+        val result2 = repository.getSupportedCurrencies(forceRefresh = true)
+        assertTrue(result2 is CurrencyResult.Success)
+        val currencies = (result2 as CurrencyResult.Success).data
+        assertEquals(2, currencies.size)
+        assertEquals("USD", currencies[0].code.value)
+        assertEquals("EUR", currencies[1].code.value)
+    }
+
+    @Test
+    fun convertCurrencyWithInvalidKeyError() = runBlocking {
+        mockWebServer.enqueue(
+            MockResponse()
+                .setResponseCode(200)
+                .setBody("""{
+                    "result": "error",
+                    "error-type": "invalid-key",
+                    "base_code": "USD",
+                    "target_code": "EUR",
+                    "conversion_rate": 0,
+                    "conversion_result": 0
+                }""")
+        )
+
+        val from = com.example.currencyconverter.domain.model.CurrencyCode("USD")
+        val to = com.example.currencyconverter.domain.model.CurrencyCode("EUR")
+        val result = repository.convertCurrency(from, to, BigDecimal("100"))
+
+        assertTrue(result is CurrencyResult.Error)
+        val error = (result as CurrencyResult.Error).error
+        assertTrue(error is DomainError.InvalidApiKey)
+    }
+
+    @Test
+    fun getSupportedCurrenciesWithInvalidKeyError() = runBlocking {
+        mockWebServer.enqueue(
+            MockResponse()
+                .setResponseCode(200)
+                .setBody("""{
+                    "result": "error",
+                    "error-type": "invalid-key",
+                    "supported_codes": []
+                }""")
+        )
+
+        val result = repository.getSupportedCurrencies(forceRefresh = true)
+
+        assertTrue(result is CurrencyResult.Error)
+        val error = (result as CurrencyResult.Error).error
+        assertTrue(error is DomainError.InvalidApiKey)
+    }
+
+    @Test
+    fun getSupportedCurrenciesHttpErrorWithInvalidJsonBody() = runBlocking {
+        mockWebServer.enqueue(
+            MockResponse()
+                .setResponseCode(400)
+                .setBody("Internal error")
+        )
+
+        val result = repository.getSupportedCurrencies(forceRefresh = true)
+
+        assertTrue(result is CurrencyResult.Error)
+        assertTrue((result as CurrencyResult.Error).error is DomainError.ServerError)
+    }
 }
