@@ -32,6 +32,12 @@ android {
     }
 
     buildTypes {
+        debug {
+            // Unit tests
+            enableUnitTestCoverage = true
+            // Instrumentation tests
+            enableAndroidTestCoverage = true
+        }
         release {
             isMinifyEnabled = true
             isShrinkResources = true
