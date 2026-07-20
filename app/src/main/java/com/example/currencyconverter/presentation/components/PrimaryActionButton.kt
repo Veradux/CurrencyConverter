@@ -37,7 +37,7 @@ fun PrimaryActionButton(
     ) {
         Icon(
             imageVector = Icons.Rounded.CheckCircleOutline,
-            contentDescription = "Swap currencies",
+            contentDescription = "Convert currency",
             modifier = Modifier.size(48.dp)
         )
     }

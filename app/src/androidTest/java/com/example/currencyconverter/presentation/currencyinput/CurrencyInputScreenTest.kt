@@ -109,7 +109,8 @@ class CurrencyInputScreenTest {
             )
         }
 
-        composeTestRule.onNodeWithText("Continue").assertIsEnabled()
+        // Continue button is now an IconButton; its label is the contentDescription "Convert"
+        composeTestRule.onNodeWithContentDescription("Convert").assertIsEnabled()
     }
 
     @Test
@@ -141,7 +142,8 @@ class CurrencyInputScreenTest {
             )
         }
 
-        composeTestRule.onNodeWithText("Continue").assertIsNotEnabled()
+        // Continue button is now an IconButton; its label is the contentDescription "Convert"
+        composeTestRule.onNodeWithContentDescription("Convert").assertIsNotEnabled()
     }
 
     @Test
@@ -178,6 +180,8 @@ class CurrencyInputScreenTest {
 
     @Test
     fun swapCurrenciesButtonIsDisplayed() {
+        var swapClicked = false
+
         composeTestRule.setContent {
             CurrencyInputContent(
                 uiState = CurrencyInputUiState(
@@ -196,7 +200,7 @@ class CurrencyInputScreenTest {
                 ),
                 onFromCurrencyClick = {},
                 onToCurrencyClick = {},
-                onSwapCurrencies = {},
+                onSwapCurrencies = { swapClicked = true },
                 onDigitClick = {},
                 onDecimalClick = {},
                 onBackspaceClick = {},
@@ -204,7 +208,12 @@ class CurrencyInputScreenTest {
             )
         }
 
-        composeTestRule.onNodeWithContentDescription("Swap currencies").assertIsDisplayed()
+        composeTestRule
+            .onNodeWithContentDescription("Swap currencies")
+            .assertIsDisplayed()
+            .performClick()
+
+        assert(swapClicked) { "Swap currencies callback was not invoked when the button was clicked" }
     }
 
     @Test

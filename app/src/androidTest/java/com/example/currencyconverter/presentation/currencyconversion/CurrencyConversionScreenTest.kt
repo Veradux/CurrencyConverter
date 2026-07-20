@@ -33,8 +33,8 @@ class CurrencyConversionScreenTest {
             toCurrency = CurrencyCode("EUR"),
             sourceAmount = BigDecimal("100"),
             convertedAmount = BigDecimal("92.50"),
-            conversionRate = BigDecimal("0.925"),
-            inverseRate = BigDecimal("1.0810810810")
+            conversionRate = BigDecimal("0.92"),
+            inverseRate = BigDecimal("1.08")
         )
 
         composeTestRule.setContent {
@@ -79,8 +79,8 @@ class CurrencyConversionScreenTest {
             toCurrency = CurrencyCode("EUR"),
             sourceAmount = BigDecimal("100"),
             convertedAmount = BigDecimal("92.50"),
-            conversionRate = BigDecimal("0.925"),
-            inverseRate = BigDecimal("1.0810810810")
+            conversionRate = BigDecimal("0.92"),
+            inverseRate = BigDecimal("1.08")
         )
 
         composeTestRule.setContent {
@@ -89,7 +89,7 @@ class CurrencyConversionScreenTest {
             }
         }
 
-        composeTestRule.onNodeWithText("1 USD = 0.925 EUR").assertIsDisplayed()
+        composeTestRule.onNodeWithText("1 USD = 0.92 EUR").assertIsDisplayed()
     }
 
     @Test
@@ -119,7 +119,7 @@ class CurrencyConversionScreenTest {
             sourceAmount = BigDecimal("100"),
             convertedAmount = BigDecimal("92.50"),
             conversionRate = BigDecimal("0.925"),
-            inverseRate = BigDecimal("1.0810810810")
+            inverseRate = BigDecimal("1.08")
         )
 
         composeTestRule.setContent {
@@ -147,8 +147,8 @@ class CurrencyConversionScreenTest {
             toCurrency = CurrencyCode("EUR"),
             sourceAmount = BigDecimal("100"),
             convertedAmount = BigDecimal("92.50"),
-            conversionRate = BigDecimal("0.925"),
-            inverseRate = BigDecimal("1.0810810810")
+            conversionRate = BigDecimal("0.92"),
+            inverseRate = BigDecimal("1.08")
         )
 
         composeTestRule.setContent {
@@ -157,6 +157,6 @@ class CurrencyConversionScreenTest {
             }
         }
 
-        composeTestRule.onNodeWithText("1 EUR = 1.0810810810 USD").assertIsDisplayed()
+        composeTestRule.onNodeWithText("1 EUR = 1.08 USD").assertIsDisplayed()
     }
 }

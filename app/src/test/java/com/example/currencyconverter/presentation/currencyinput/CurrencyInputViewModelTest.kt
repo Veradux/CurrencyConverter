@@ -54,8 +54,9 @@ class CurrencyInputViewModelTest {
         advanceUntilIdle()
 
         val state = viewModel.uiState.value
-        assertEquals("USD", state.fromCurrency?.code?.value)
-        assertEquals("EUR", state.toCurrency?.code?.value)
+        // On first launch, no currencies are pre-selected; the user picks them manually
+        assertNull(state.fromCurrency)
+        assertNull(state.toCurrency)
         assertEquals("", state.amount)
         assertFalse(state.isValid)
         assertFalse(state.isLoading)
@@ -63,13 +64,16 @@ class CurrencyInputViewModelTest {
 
     @Test
     fun validAmountEntryEnablesContinue() = runTest(testDispatcher) {
-        fakeRepository.currencies = listOf(
-            Currency(CurrencyCode("USD"), "US Dollar", "\uD83C\uDDFA\uD83C\uDDF8"),
-            Currency(CurrencyCode("EUR"), "Euro", "\uD83C\uDDEA\uD83C\uDDFA")
-        )
+        val usd = Currency(CurrencyCode("USD"), "US Dollar", "\uD83C\uDDFA\uD83C\uDDF8")
+        val eur = Currency(CurrencyCode("EUR"), "Euro", "\uD83C\uDDEA\uD83C\uDDFA")
+        fakeRepository.currencies = listOf(usd, eur)
 
         val viewModel = createViewModel()
         advanceUntilIdle()
+
+        // User must select currencies first
+        viewModel.onFromCurrencySelected(usd)
+        viewModel.onToCurrencySelected(eur)
 
         viewModel.onAmountDigit('1')
         viewModel.onAmountDigit('0')
@@ -100,13 +104,16 @@ class CurrencyInputViewModelTest {
 
     @Test
     fun validAmountPassesValidation() = runTest(testDispatcher) {
-        fakeRepository.currencies = listOf(
-            Currency(CurrencyCode("USD"), "US Dollar", "\uD83C\uDDFA\uD83C\uDDF8"),
-            Currency(CurrencyCode("EUR"), "Euro", "\uD83C\uDDEA\uD83C\uDDFA")
-        )
+        val usd = Currency(CurrencyCode("USD"), "US Dollar", "\uD83C\uDDFA\uD83C\uDDF8")
+        val eur = Currency(CurrencyCode("EUR"), "Euro", "\uD83C\uDDEA\uD83C\uDDFA")
+        fakeRepository.currencies = listOf(usd, eur)
 
         val viewModel = createViewModel()
         advanceUntilIdle()
+
+        // User must select currencies first
+        viewModel.onFromCurrencySelected(usd)
+        viewModel.onToCurrencySelected(eur)
 
         viewModel.onAmountDigit('1')
         viewModel.onAmountDigit('2')
@@ -117,13 +124,16 @@ class CurrencyInputViewModelTest {
 
     @Test
     fun continueButtonEnabledWhenAllValid() = runTest(testDispatcher) {
-        fakeRepository.currencies = listOf(
-            Currency(CurrencyCode("USD"), "US Dollar", "\uD83C\uDDFA\uD83C\uDDF8"),
-            Currency(CurrencyCode("EUR"), "Euro", "\uD83C\uDDEA\uD83C\uDDFA")
-        )
+        val usd = Currency(CurrencyCode("USD"), "US Dollar", "\uD83C\uDDFA\uD83C\uDDF8")
+        val eur = Currency(CurrencyCode("EUR"), "Euro", "\uD83C\uDDEA\uD83C\uDDFA")
+        fakeRepository.currencies = listOf(usd, eur)
 
         val viewModel = createViewModel()
         advanceUntilIdle()
+
+        // User must select currencies first
+        viewModel.onFromCurrencySelected(usd)
+        viewModel.onToCurrencySelected(eur)
 
         viewModel.onAmountDigit('5')
         viewModel.onAmountDigit('0')
